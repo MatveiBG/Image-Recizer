@@ -3,6 +3,7 @@ import os
 import tkinter
 from tkinter import *
 from tkinter import filedialog
+from tkinter  import ttk
 
 
 class Direc():
@@ -56,6 +57,7 @@ def transform(base_dir, final_dir):
                         else:
                             break
                     bg.save(f'{str(final_dir)}/{new_name}_new.png') #final folder
+                    
                 except TypeError:
                     print(f"Error with file {images}")
         print("Finished")
@@ -65,29 +67,57 @@ def checkButton(base_dir,final_dir):
         btn3.configure(state=NORMAL)
         window.update()
 
+def transformation(base_dir, final_dir, window):
+    txtStatus.set("Processing images.")
+    window.update()
+    transform(base_dir, final_dir)
+    txtStatus.set("Finished.")
+    window.update()
+
+
 base_dir = Direc()
 final_dir = Direc()
 
 window=Tk()
+window.title('File transformer')
+window.geometry("300x200+10+10")
 
 window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir))
+window.grid_columnconfigure(1, weight=1)
 te = Text(window, height = 5, width = 52)
 
-btn=Button(window, text="Choose a starting directory", fg='blue', command= lambda: base_dir.askChem())
-btn.place(x=80, y=60)
+btn=Button(
+            window,
+            text="Starting directory",
+            fg='blue',
+            command= lambda: base_dir.askChem()
+            )
 
-btn2=Button(window, text="Choose a final directory", fg='blue', command= lambda: final_dir.askChem())
-btn2.place(x=80, y=100)
+btn.grid(row = 1, column = 1, pady= 10)
+
+btn2=Button(
+            window,
+            text="Final directory",
+            fg='blue',
+            command= lambda: final_dir.askChem()
+            )
+btn2.grid(row = 2, column = 1, pady= 10)
 
 btn3=Button(
             window,
             text="Transform",
             fg='blue',
-            command= lambda: transform(base_dir, final_dir),
+            command= lambda: transformation(base_dir, final_dir, window),
             state= DISABLED         
             )
-btn3.place(x=80, y=140)
-window.title('File transformer')
-window.geometry("300x200+10+10")
+btn3.grid(row= 3, column = 1, pady= 10)
 
+txtStatus = StringVar()
+status = Label(
+    window,
+    textvariable= txtStatus
+)
+
+txtStatus.set("Choose starting and final directory.")
+status.grid(row= 4, column= 1, pady = 5)
 window.mainloop()
