@@ -3,7 +3,6 @@ import os
 import tkinter
 from tkinter import *
 from tkinter import filedialog
-from tkinter  import ttk
 from rembg import remove
 
 
