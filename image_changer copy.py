@@ -74,34 +74,54 @@ def transformation(base_dir, final_dir, window):
     txtStatus.set("Finished.")
     window.update()
 
+def dirButton(txt, dir):
+    dir.askChem()
+    txt.set(dir)
+    window.update()
+
 
 base_dir = Direc()
 final_dir = Direc()
 
 window=Tk()
 window.title('File transformer')
-window.geometry("300x200+10+10")
+window.geometry("400x200+10+10")
 
 window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir))
 window.grid_columnconfigure(1, weight=1)
-te = Text(window, height = 5, width = 52)
 
 btn=Button(
             window,
             text="Starting directory",
             fg='blue',
-            command= lambda: base_dir.askChem()
+            command= lambda: dirButton(txtStart, base_dir)
             )
 
-btn.grid(row = 1, column = 1, pady= 10)
+btn.grid(row = 1, column = 1, pady= 5)
+txtStart = StringVar()
+labelStart = Label(
+    window,
+    textvariable= txtStart
+)
+
+txtStart.set("Choose a starting directory.")
+labelStart.grid(row= 2, column= 1, pady = 0)
 
 btn2=Button(
             window,
             text="Final directory",
             fg='blue',
-            command= lambda: final_dir.askChem()
+            command= lambda: dirButton(txtFin, final_dir)
             )
-btn2.grid(row = 2, column = 1, pady= 10)
+btn2.grid(row = 3, column = 1, pady= 5)
+txtFin = StringVar()
+labelFin = Label(
+    window,
+    textvariable= txtFin
+)
+
+txtFin.set("Choose a final directory.")
+labelFin.grid(row= 4, column= 1, pady = 0)
 
 btn3=Button(
             window,
@@ -110,7 +130,7 @@ btn3=Button(
             command= lambda: transformation(base_dir, final_dir, window),
             state= DISABLED         
             )
-btn3.grid(row= 3, column = 1, pady= 10)
+btn3.grid(row= 5, column = 1, pady= 5)
 
 txtStatus = StringVar()
 status = Label(
@@ -118,6 +138,6 @@ status = Label(
     textvariable= txtStatus
 )
 
-txtStatus.set("Choose starting and final directory.")
-status.grid(row= 4, column= 1, pady = 5)
+txtStatus.set("")
+status.grid(row= 6, column= 1, pady = 0)
 window.mainloop()
