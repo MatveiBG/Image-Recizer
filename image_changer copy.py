@@ -37,8 +37,16 @@ def transform(base_dir, final_dir, removeBool, finBool):
         removeBool: if True, images will go through background removal
         '''
         if finBool:
-            os.mkdir(f'{base_dir}_new')
-            final_dir = f'{base_dir}_new'
+            finStr = f'{base_dir}_new/'
+            print(finStr)
+            if os.path.exists(finStr):
+                counter = 1
+                finStr = finStr[:-1] + f'_({counter})'
+                while os.path.exists(finStr):
+                    counter += 1
+                    finStr = finStr[:-3] + f'({counter})/'
+            os.mkdir(finStr)
+            final_dir = finStr
         basewidth = 912
         baseheight = 1100
         print("Starting")
@@ -284,5 +292,12 @@ status = Label(
 )
 txtStatus.set("")
 status.grid(row= 5, column= 1, pady = 0)
+
+popup = Toplevel()
+label = Label(popup, text="Error: You already have a directory auto-created for this starting directory\n please delete it or choose another starting directory")
+label.pack(fill='x', padx=50, pady=5)
+button_close = Button(popup, text="Close", command=popup.destroy)
+button_close.pack(fill='x')
+
 
 window.mainloop()
