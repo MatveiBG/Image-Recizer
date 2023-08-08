@@ -29,7 +29,7 @@ def yesDirectories(dir1: Direc, dir2: Direc):
     if not dir1.isEmpty() and not dir2.isEmpty():
         return True
 
-def transform(base_dir, final_dir, removeBool, finBool):
+def transform(base_dir, final_dir, removeBool, finBool, size, back):
         ''' Transforms a folder of images in required size,
         removes background if desired.
         base_dir: directory where files are taken from
@@ -41,17 +41,18 @@ def transform(base_dir, final_dir, removeBool, finBool):
             print(finStr)
             if os.path.exists(finStr):
                 counter = 1
-                finStr = finStr[:-1] + f'_({counter})'
+                finStr = finStr[:-1] + f'_({counter})/'
                 while os.path.exists(finStr):
                     counter += 1
-                    finStr = finStr[:-3] + f'({counter})/'
+                    finStr = finStr[:-3] + f'{counter})/'
             os.mkdir(finStr)
             final_dir = finStr
-        basewidth = 912
-        baseheight = 1100
+        basewidth = size[0]
+        baseheight = size[1]
+        print(basewidth, baseheight)
         print("Starting")
         for images in os.listdir(str(base_dir)):
-            bg = PIL.Image.new(mode="RGBA", size=(1200,1200), color="white")
+            bg = PIL.Image.new(mode="RGBA", size=(back,back), color="white")
             # check if the image ends with compatible extension
             if (images.endswith(".png") or images.endswith(".jpeg") or images.endswith(".jpg") or images.endswith(".webp")):
                 try:
@@ -67,7 +68,7 @@ def transform(base_dir, final_dir, removeBool, finBool):
                         img = img.resize((hsize, baseheight), PIL.Image.Resampling.LANCZOS)
                     if removeBool:
                         img = remove(img)
-                    bg.paste(img, (int( 600 - img.size[0]/2 ), int( 600 - img.size[1]/2 ) ), img)
+                    bg.paste(img, (int( back/2 - img.size[0]/2 ), int( back/2 - img.size[1]/2 ) ), img)
                     new_name = ""
                     for lettres in images:
                         if lettres != '.':
@@ -84,27 +85,44 @@ def checkButton(base_dir,final_dir, locked):
     ''' Called when one of the choosing buttons is pressed,
     if conditions are valiadated activates transform button,
     else keeps it off'''
-    if locked: #if the final directory is auto-created
-        if not base_dir.isEmpty():
-            transButton.configure(state=NORMAL)
-            window.update()
+    if widthEntry["state"] == DISABLED:
+        if locked: #if the final directory is auto-created
+            if not base_dir.isEmpty():
+                transButton.configure(state=NORMAL)
+                window.update()
+            else:
+                transButton.configure(state=DISABLED)
+                window.update()
         else:
-            transButton.configure(state=DISABLED)
-            window.update()
+            if yesDirectories(final_dir, base_dir):
+                transButton.configure(state=NORMAL)
+                window.update()
+            else:
+                transButton.configure(state=DISABLED)
+                window.update()
     else:
-        if yesDirectories(final_dir, base_dir):
-            transButton.configure(state=NORMAL)
-            window.update()
-        else:
-            transButton.configure(state=DISABLED)
-            window.update()
+        transButton.configure(state=DISABLED)
+        window.update()
 
-def transformation(base_dir, final_dir, window, removeBool, finBool):
+def transformation(base_dir, final_dir, window, removeBool, finBool, size, bg):
     ''' Called with the press of transform button,
     transforms images and updates status'''
+    newSize = []
+    if size[0].isdigit():
+        newSize.append(int(size[0]))
+    else:
+        newSize.append(912)
+    if size[1].isdigit():
+        newSize.append(int(size[1]))
+    else:
+        newSize.append(1100)
+    if bg.isdigit():
+       bg = int(bg)
+    else:
+        bg = 1200 
     txtStatus.set("Processing images.")
     window.update()
-    transform(base_dir, final_dir, removeBool, finBool)
+    transform(base_dir, final_dir, removeBool, finBool, newSize, bg)
     txtStatus.set("Finished.")
     window.update()
 
@@ -126,7 +144,7 @@ final_dir = Direc()
 #Window setup####
 window=Tk()
 window.title('File transformer')
-window.geometry("500x275+10+10")
+window.geometry("500x300+10+10")
 
 window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir, finDirVar.get()))
 window.grid_columnconfigure(1, weight=1)
@@ -173,17 +191,17 @@ vcmd = window.register(checkDigit)
 
 #width entry
 def delTextWidth(_):
-    if widthEntry.get()=='Enter Desired Width':
+    if widthEntry.get()=='Enter Width (912)':
         widthEntry.delete(0, 'end')
         widthEntry.configure(validatecommand = (vcmd, '%P'))
 def checkTextWidth(_):
     if not widthEntry.get():
         widthEntry.configure(validatecommand = ())
-        widthEntry.insert(0, 'Enter Desired Width')
+        widthEntry.insert(0, 'Enter Width (912)')
 
 widthEntry = Entry(sizeFrame, validate='all')
 
-widthEntry.insert(0, 'Enter Desired Width')
+widthEntry.insert(0, 'Enter Width (912)')
 widthEntry.grid(row= 0, column=0)
 
 widthEntry.bind("<FocusIn>", delTextWidth)
@@ -192,26 +210,45 @@ widthEntry.bind("<FocusOut>", checkTextWidth)
 #height entry
 vcmd2 = window.register(checkDigit)
 def delTextHeight(_):
-    if heightEntry.get()=='Enter Desired Height':
+    if heightEntry.get()=='Enter Height (1100)':
         heightEntry.delete(0, 'end')
         heightEntry.configure(validatecommand = (vcmd2, '%P'))
 def checkTextHeigth(_):
     if not heightEntry.get():
         heightEntry.configure(validatecommand = ())
-        heightEntry.insert(0, 'Enter Desired Height')
+        heightEntry.insert(0, 'Enter Height (1100)')
 
 heightEntry = Entry(sizeFrame, validate='all')
 
-heightEntry.insert(0, 'Enter Desired Height')
+heightEntry.insert(0, 'Enter Height (1100)')
 heightEntry.grid(row= 1, column=0)
 
 heightEntry.bind("<FocusIn>", delTextHeight)
 heightEntry.bind("<FocusOut>", checkTextHeigth)
 
+#bg size entry
+def delTextSize(_):
+    if sizeEntry.get()=='Enter Background size (1200)':
+        sizeEntry.delete(0, 'end')
+        sizeEntry.configure(validatecommand = (vcmd, '%P'))
+def checkTextSize(_):
+    if not sizeEntry.get():
+        sizeEntry.configure(validatecommand = ())
+        sizeEntry.insert(0, 'Enter Background size (1200)')
+
+sizeEntry = Entry(sizeFrame, validate='all')
+
+sizeEntry.insert(0, 'Enter Background size (1200)')
+sizeEntry.grid(row= 2, column=0)
+
+sizeEntry.bind("<FocusIn>", delTextSize)
+sizeEntry.bind("<FocusOut>", checkTextSize)
+
 #size validation/change button
 def lockEntry():
     widthEntry.configure(state= DISABLED)
     heightEntry.configure(state= DISABLED)
+    sizeEntry.configure(state= DISABLED)
 
 validateButton=Button(
             sizeFrame,
@@ -224,6 +261,7 @@ validateButton.grid(row = 0, column = 1)
 def unlockEntry():
     widthEntry.configure(state= NORMAL)
     heightEntry.configure(state= NORMAL)
+    sizeEntry.configure(state= NORMAL)
 
 changeButton=Button(
             sizeFrame,
@@ -279,7 +317,14 @@ transButton=Button(
             window,
             text="Transform",
             fg='blue',
-            command= lambda: transformation(base_dir, final_dir, window, removeVar.get(), finDirVar.get()),
+            command= lambda: transformation(base_dir,
+                                            final_dir,
+                                            window,
+                                            removeVar.get(),
+                                            finDirVar.get(),
+                                            (widthEntry.get(),heightEntry.get()),
+                                            sizeEntry.get()
+                                            ),
             state= DISABLED         
             )
 transButton.grid(row= 4, column = 1, pady= 0)
@@ -290,14 +335,15 @@ status = Label(
     window,
     textvariable= txtStatus
 )
-txtStatus.set("")
+txtStatus.set("Choose directory(ies) and validate size.")
 status.grid(row= 5, column= 1, pady = 0)
 
+'''
 popup = Toplevel()
 label = Label(popup, text="Error: You already have a directory auto-created for this starting directory\n please delete it or choose another starting directory")
 label.pack(fill='x', padx=50, pady=5)
 button_close = Button(popup, text="Close", command=popup.destroy)
-button_close.pack(fill='x')
+button_close.pack(fill='x')'''
 
 
 window.mainloop()
