@@ -5,7 +5,6 @@ from tkinter import *
 from tkinter import filedialog
 from rembg import remove
 
-
 class Direc():
     '''class used to define a directory path'''
     def __init__(self):
@@ -108,7 +107,7 @@ final_dir = Direc()
 #Window setup####
 window=Tk()
 window.title('File transformer')
-window.geometry("400x250+10+10")
+window.geometry("500x275+10+10")
 
 window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir))
 window.grid_columnconfigure(1, weight=1)
@@ -124,42 +123,89 @@ checkRmv = Checkbutton(
 )
 checkRmv.grid(row=0, column=1)
 
+#checkbox for final directory creation
+finDirVar = BooleanVar()
+checkCrtDir = Checkbutton(
+    window,
+    text = 'Create a final directory in same folder as original',
+    variable= removeVar,
+    command = lambda: print(removeVar.get())
+)
+checkCrtDir.grid(row= 1, column= 1)
+
+#size frame
+sizeFrame = Frame(window)
+sizeFrame.grid(row= 2, column=1)
+
+#size entry
+def checkDigit(P):
+    if str.isdigit(P) or P == '':
+        return True
+    else:
+        return False
+vcmd = window.register(checkDigit)
+widthEntry = Entry(sizeFrame, validate='all', validatecommand=(vcmd, '%P'))
+widthEntry.grid(row= 0, column=0)
+heightEntry = Entry(sizeFrame, validate='all', validatecommand=(vcmd, '%P'))
+heightEntry.grid(row= 1, column=0)
+
+#size validation/change button
+validateButton=Button(
+            sizeFrame,
+            text="Validate",
+            fg='blue',
+            command= lambda: dirButton(txtFin, final_dir, False)
+            )
+validateButton.grid(row = 0, column = 1)
+
+changeButton=Button(
+            sizeFrame,
+            text="Change",
+            fg='blue',
+            command= lambda: dirButton(txtFin, final_dir, False)
+            )
+changeButton.grid(row = 1, column = 1)
+
+#directory buttons frame
+dirFrame = Frame(window)
+dirFrame.grid(row= 3, column= 1)
+
 #button for initial directory
 startButton=Button(
-            window,
+            dirFrame,
             text="Starting directory",
             fg='blue',
             command= lambda: dirButton(txtStart, base_dir, True)
             )
-startButton.grid(row = 1, column = 1, pady= 5)
+startButton.grid(row = 0, column = 0, pady= 0)
 
 #label for initial directory choice
 txtStart = StringVar()
 labelStart = Label(
-    window,
+    dirFrame,
     textvariable= txtStart
 )
 
 txtStart.set("Choose a starting directory.")
-labelStart.grid(row= 2, column= 1, pady = 0)
+labelStart.grid(row= 1, column= 0, pady = 0)
 
 #button for final directory
 finButton=Button(
-            window,
+            dirFrame,
             text="Final directory",
             fg='blue',
             command= lambda: dirButton(txtFin, final_dir, False)
             )
-finButton.grid(row = 3, column = 1, pady= 5)
+finButton.grid(row = 2, column = 0, pady= 0)
 
 #label for final directory choice
 txtFin = StringVar()
 labelFin = Label(
-    window,
+    dirFrame,
     textvariable= txtFin
 )
 txtFin.set("Choose a final directory.")
-labelFin.grid(row= 4, column= 1, pady = 0)
+labelFin.grid(row= 3, column= 0, pady = 0)
 
 #button to do transformation
 transButton=Button(
@@ -169,7 +215,7 @@ transButton=Button(
             command= lambda: transformation(base_dir, final_dir, window, removeVar.get()),
             state= DISABLED         
             )
-transButton.grid(row= 5, column = 1, pady= 5)
+transButton.grid(row= 4, column = 1, pady= 0)
 
 #label for transformation status and instructions
 txtStatus = StringVar()
@@ -178,6 +224,6 @@ status = Label(
     textvariable= txtStatus
 )
 txtStatus.set("")
-status.grid(row= 6, column= 1, pady = 0)
+status.grid(row= 5, column= 1, pady = 0)
 
 window.mainloop()
