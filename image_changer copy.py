@@ -29,7 +29,7 @@ def yesDirectories(dir1: Direc, dir2: Direc):
     if not dir1.isEmpty() and not dir2.isEmpty():
         return True
 
-def transform(base_dir, final_dir, removeBool, finBool, size, back):
+def transform(base_dir, final_dir, removeBool, finBool, size, back, color):
         ''' Transforms a folder of images in required size,
         removes background if desired.
         base_dir: directory where files are taken from
@@ -52,7 +52,7 @@ def transform(base_dir, final_dir, removeBool, finBool, size, back):
         print(basewidth, baseheight)
         print("Starting")
         for images in os.listdir(str(base_dir)):
-            bg = PIL.Image.new(mode="RGBA", size=(back,back), color="white")
+            bg = PIL.Image.new(mode="RGBA", size=(back,back), color=None if color =='Transparent' else color)
             # check if the image ends with compatible extension
             if (images.endswith(".png") or images.endswith(".jpeg") or images.endswith(".jpg") or images.endswith(".webp")):
                 try:
@@ -104,7 +104,7 @@ def checkButton(base_dir,final_dir, locked):
         transButton.configure(state=DISABLED)
         window.update()
 
-def transformation(base_dir, final_dir, window, removeBool, finBool, size, bg):
+def transformation(base_dir, final_dir, window, removeBool, finBool, size, bg, color):
     ''' Called with the press of transform button,
     transforms images and updates status'''
     newSize = []
@@ -122,19 +122,20 @@ def transformation(base_dir, final_dir, window, removeBool, finBool, size, bg):
         bg = 1200 
     txtStatus.set("Processing images.")
     window.update()
-    transform(base_dir, final_dir, removeBool, finBool, newSize, bg)
+    transform(base_dir, final_dir, removeBool, finBool, newSize, bg, color)
     txtStatus.set("Finished.")
     window.update()
 
 def dirButton(txt, dir, strt):
     ''' Called with the press of directory buttons,
-    used to get user choice of directory and show selected direcotry after'''
+    used to get user choice of directory and show selected directory after'''
     dir.askChem()
     if dir.isEmpty(): #if no directory has been choosen displays instructions
         txt.set("Choose a starting directory." if strt else  "Choose a final directory.")
     else:
         txt.set(dir)
     window.update()
+    statusUpdate()
 
 #Instacing paths#
 base_dir = Direc()
@@ -144,11 +145,24 @@ final_dir = Direc()
 #Window setup####
 window=Tk()
 window.title('File transformer')
-window.geometry("500x300+10+10")
+window.geometry("500x325+10+10")
 
 window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir, finDirVar.get()))
 window.grid_columnconfigure(1, weight=1)
 #################
+
+'''
+#initial popup
+popup = Toplevel()
+label = Label(popup, text="Welcome to the image transformer,\n"
+              "Choose a directory (folder) where you want your images taken from\n"
+              "and either choose a destination for your transformed images\n"
+              "or choose the option to create a new folder for them.\n"
+              "If the images have a background that you want to remove check 'remove background' box.")
+label.pack(fill='x', padx=50, pady=5)
+button_close = Button(popup, text="Close", command=popup.destroy)
+button_close.pack(fill='x')
+'''
 
 #checkbox for bg removal
 removeVar = BooleanVar()
@@ -167,6 +181,7 @@ def finDirLock(lock):
         finButton.configure(state=DISABLED)
     else:
         finButton.configure(state=NORMAL)
+    statusUpdate()
 
 finDirVar = BooleanVar()
 checkCrtDir = Checkbutton(
@@ -177,9 +192,40 @@ checkCrtDir = Checkbutton(
     )
 checkCrtDir.grid(row= 1, column= 1)
 
+#color frame
+colorFrame = Frame()
+colorFrame.grid(row= 2, column= 1)
+
+#color label
+txtColor = StringVar()
+labelFin = Label(
+    colorFrame,
+    textvariable= txtColor
+)
+txtColor.set("Background color:")
+labelFin.grid(row= 0, column= 0, pady = 0)
+
+#color dropdown
+clicked = StringVar()
+clicked.set('White')
+colorOptions = [
+    'White',
+    'Black',
+    'Red',
+    'Green',
+    'Blue',
+    'Cyan',
+    'Yellow',
+    'Magenta',
+    'Transparent',
+]
+colors = OptionMenu(colorFrame, clicked, *colorOptions)
+colors.grid(row = 0, column = 1)
+
+
 #size frame
 sizeFrame = Frame(window)
-sizeFrame.grid(row= 2, column=1)
+sizeFrame.grid(row= 3, column=1)
 
 #size entry
 def checkDigit(P):
@@ -249,6 +295,7 @@ def lockEntry():
     widthEntry.configure(state= DISABLED)
     heightEntry.configure(state= DISABLED)
     sizeEntry.configure(state= DISABLED)
+    statusUpdate()
 
 validateButton=Button(
             sizeFrame,
@@ -262,6 +309,7 @@ def unlockEntry():
     widthEntry.configure(state= NORMAL)
     heightEntry.configure(state= NORMAL)
     sizeEntry.configure(state= NORMAL)
+    statusUpdate()
 
 changeButton=Button(
             sizeFrame,
@@ -273,7 +321,7 @@ changeButton.grid(row = 1, column = 1)
 
 #directory buttons frame
 dirFrame = Frame(window)
-dirFrame.grid(row= 3, column= 1)
+dirFrame.grid(row= 4, column= 1)
 
 #button for initial directory
 startButton=Button(
@@ -323,11 +371,12 @@ transButton=Button(
                                             removeVar.get(),
                                             finDirVar.get(),
                                             (widthEntry.get(),heightEntry.get()),
-                                            sizeEntry.get()
+                                            sizeEntry.get(),
+                                            clicked.get()
                                             ),
             state= DISABLED         
             )
-transButton.grid(row= 4, column = 1, pady= 0)
+transButton.grid(row= 5, column = 1, pady= 0)
 
 #label for transformation status and instructions
 txtStatus = StringVar()
@@ -335,15 +384,35 @@ status = Label(
     window,
     textvariable= txtStatus
 )
+def statusUpdate():
+    if finDirVar.get():
+        if base_dir.isEmpty():
+            directories = "choose a directory"
+        else:
+            directories = ""
+    else:
+        if noDirectories(base_dir, final_dir):
+            directories = "choose directories"
+        elif yesDirectories(base_dir, final_dir):
+            directories = ""
+        else:
+            directories = "choose a directory"
+    if widthEntry['state'] == DISABLED:
+        valid = ""
+    else:
+        valid = "validate size"
+
+    if directories:
+        directories = directories.capitalize()
+        if valid:
+            statusTxt = f"{directories} and {valid}."
+        else:
+            statusTxt = f"{directories}."
+    else:
+        statusTxt = valid.capitalize() + "."
+    txtStatus.set(statusTxt)
+    window.update()
 txtStatus.set("Choose directory(ies) and validate size.")
-status.grid(row= 5, column= 1, pady = 0)
-
-'''
-popup = Toplevel()
-label = Label(popup, text="Error: You already have a directory auto-created for this starting directory\n please delete it or choose another starting directory")
-label.pack(fill='x', padx=50, pady=5)
-button_close = Button(popup, text="Close", command=popup.destroy)
-button_close.pack(fill='x')'''
-
+status.grid(row= 6, column= 1, pady = 0)
 
 window.mainloop()
