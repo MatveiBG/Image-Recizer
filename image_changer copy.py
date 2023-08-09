@@ -152,19 +152,6 @@ window.bind('<ButtonRelease>', lambda x: checkButton(base_dir, final_dir, finDir
 window.grid_columnconfigure(1, weight=1)
 #################
 
-'''
-#initial popup
-popup = Toplevel()
-label = Label(popup, text="Welcome to the image transformer,\n"
-              "Choose a directory (folder) where you want your images taken from\n"
-              "and either choose a destination for your transformed images\n"
-              "or choose the option to create a new folder for them.\n"
-              "If the images have a background that you want to remove check 'remove background' box.")
-label.pack(fill='x', padx=50, pady=5)
-button_close = Button(popup, text="Close", command=popup.destroy)
-button_close.pack(fill='x')
-'''
-
 #checkbox for bg removal
 removeVar = BooleanVar()
 checkRmv = Checkbutton(
