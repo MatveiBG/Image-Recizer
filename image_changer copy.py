@@ -50,7 +50,6 @@ def transform(base_dir, final_dir, removeBool, finBool, size, back, color):
         basewidth = size[0]
         baseheight = size[1]
         print(basewidth, baseheight)
-        print("Starting")
         for images in os.listdir(str(base_dir)):
             bg = PIL.Image.new(mode="RGBA", size=(back,back), color=None if color =='Transparent' else color)
             # check if the image ends with compatible extension
@@ -79,7 +78,6 @@ def transform(base_dir, final_dir, removeBool, finBool, size, back, color):
                     
                 except TypeError:
                     print(f"Error with file {images}")
-        print("Finished")
 
 def checkButton(base_dir,final_dir, locked):
     ''' Called when one of the choosing buttons is pressed,
