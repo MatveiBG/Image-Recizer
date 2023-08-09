@@ -89,20 +89,23 @@ def checkButton(base_dir,final_dir, locked):
         if locked: #if the final directory is auto-created
             if not base_dir.isEmpty():
                 transButton.configure(state=NORMAL)
-                window.update()
             else:
                 transButton.configure(state=DISABLED)
-                window.update()
         else:
             if yesDirectories(final_dir, base_dir):
                 transButton.configure(state=NORMAL)
-                window.update()
             else:
                 transButton.configure(state=DISABLED)
-                window.update()
+                
     else:
         transButton.configure(state=DISABLED)
-        window.update()
+        
+    if locked:
+        txtFin.set('Final directory will be created.')
+    else:
+        txtFin.set('Choose a final directory.')
+
+    window.update()
 
 def transformation(base_dir, final_dir, window, removeBool, finBool, size, bg, color):
     ''' Called with the press of transform button,
@@ -198,12 +201,12 @@ colorFrame.grid(row= 2, column= 1)
 
 #color label
 txtColor = StringVar()
-labelFin = Label(
+labelColor = Label(
     colorFrame,
     textvariable= txtColor
 )
 txtColor.set("Background color:")
-labelFin.grid(row= 0, column= 0, pady = 0)
+labelColor.grid(row= 0, column= 0, pady = 0)
 
 #color dropdown
 clicked = StringVar()
