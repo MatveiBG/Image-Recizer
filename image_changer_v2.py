@@ -27,7 +27,7 @@ def noDirectories(dir1: Direc, dir2: Direc):
         return True
 
 def yesDirectories(dir1: Direc, dir2: Direc):
-    ''' Returns true if both directories have not been filled yet'''
+    ''' Returns true if first directory has been filled but not the second'''
     if not dir1.isEmpty() and not dir2.isEmpty():
         return True
 
