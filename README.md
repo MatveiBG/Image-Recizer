@@ -6,3 +6,10 @@ Current features:
 - Choose a whole folder to recize
 - GUI
 - Remoce Background
+
+Requirements:
+python: >3.7, <3.12 (for rembg)
+rembg 
+  numpy
+pillow
+tkinter
