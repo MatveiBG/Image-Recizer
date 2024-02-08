@@ -8,8 +8,8 @@ Current features:
 - Remoce Background
 
 Requirements:
-python: >3.7, <3.12 (for rembg)
-rembg 
-  numpy
-pillow
-tkinter
+- python: >3.7, <3.12 (for rembg)
+- rembg 
+- numpy
+- pillow
+- tkinter
